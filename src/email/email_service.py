@@ -4,6 +4,7 @@ from email.mime.multipart import MIMEMultipart
 from src.utils.config import config
 from src.utils.logger import logger
 from src.email.templates import get_thank_you_email, get_followup_email
+from src.utils.retry import retry_email_operation
 
 class EmailService:
     def __init__(self):
@@ -14,27 +15,32 @@ class EmailService:
         self.from_name = config.SMTP_FROM_NAME
         self.from_email = config.SMTP_FROM_EMAIL
     
-    def send_thank_you_email(self, customer_email: str, customer_name: str, service_type: str = None) -> bool:
-        try:
-            template = get_thank_you_email(customer_name, service_type)
-            
-            msg = MIMEMultipart('alternative')
-            msg['Subject'] = template['subject']
-            msg['From'] = f'{self.from_name} <{self.from_email}>'
-            msg['To'] = customer_email
-            
-            part1 = MIMEText(template['text'], 'plain')
-            part2 = MIMEText(template['html'], 'html')
-            
-            msg.attach(part1)
-            msg.attach(part2)
-            
-            with smtplib.SMTP(self.smtp_host, self.smtp_port) as server:
+    def _send_email(self, customer_email: str, template: dict):
+        """Internal method to send email with retry logic"""
+        msg = MIMEMultipart('alternative')
+        msg['Subject'] = template['subject']
+        msg['From'] = f'{self.from_name} <{self.from_email}>'
+        msg['To'] = customer_email
+        
+        part1 = MIMEText(template['text'], 'plain')
+        part2 = MIMEText(template['html'], 'html')
+        
+        msg.attach(part1)
+        msg.attach(part2)
+        
+        def _send():
+            with smtplib.SMTP(self.smtp_host, self.smtp_port, timeout=30) as server:
                 if self.smtp_port == 587:
                     server.starttls()
                 server.login(self.smtp_user, self.smtp_password)
                 server.send_message(msg)
-            
+        
+        return retry_email_operation(_send)
+    
+    def send_thank_you_email(self, customer_email: str, customer_name: str, service_type: str = None) -> bool:
+        try:
+            template = get_thank_you_email(customer_name, service_type)
+            self._send_email(customer_email, template)
             logger.info(f'Thank-you email sent to {customer_email}')
             return True
         except Exception as error:
@@ -44,24 +50,7 @@ class EmailService:
     def send_followup_email(self, customer_email: str, customer_name: str) -> bool:
         try:
             template = get_followup_email(customer_name)
-            
-            msg = MIMEMultipart('alternative')
-            msg['Subject'] = template['subject']
-            msg['From'] = f'{self.from_name} <{self.from_email}>'
-            msg['To'] = customer_email
-            
-            part1 = MIMEText(template['text'], 'plain')
-            part2 = MIMEText(template['html'], 'html')
-            
-            msg.attach(part1)
-            msg.attach(part2)
-            
-            with smtplib.SMTP(self.smtp_host, self.smtp_port) as server:
-                if self.smtp_port == 587:
-                    server.starttls()
-                server.login(self.smtp_user, self.smtp_password)
-                server.send_message(msg)
-            
+            self._send_email(customer_email, template)
             logger.info(f'Follow-up email sent to {customer_email}')
             return True
         except Exception as error:
