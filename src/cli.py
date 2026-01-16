@@ -114,6 +114,8 @@ def stats():
     from src.database.models import get_appointments_by_date
     from datetime import datetime
     from src.database.db import get_connection
+    from src.database.response_tracking import ResponseTracker
+    from src.database.segmentation import CustomerSegmentation
     
     conn = get_connection()
     cursor = conn.cursor()
@@ -137,6 +139,12 @@ def stats():
     ''')
     recent_emails = cursor.fetchone()[0]
     
+    # Response tracking
+    response_stats = ResponseTracker.get_response_stats()
+    
+    # Segmentation
+    segment_stats = CustomerSegmentation.get_segment_stats()
+    
     conn.close()
     
     click.echo('\n=== Statistics ===')
@@ -146,6 +154,52 @@ def stats():
     click.echo('\nEmail Status Breakdown:')
     for status, count in email_stats.items():
         click.echo(f'  {status}: {count}')
+    
+    click.echo('\n=== Customer Segmentation ===')
+    click.echo(f'VIP Customers (5+ visits): {segment_stats["vip_count"]}')
+    click.echo(f'Regular Customers (2-4 visits): {segment_stats["regular_count"]}')
+    click.echo(f'New Customers (1 visit): {segment_stats["new_count"]}')
+    click.echo(f'Inactive Customers (90+ days): {segment_stats["inactive_count"]}')
+    
+    click.echo('\n=== Email Engagement ===')
+    click.echo(f'Open Rate: {response_stats["open_rate"]:.1f}%')
+    click.echo(f'Click Rate: {response_stats["click_rate"]:.1f}%')
+    click.echo(f'Reply Rate: {response_stats["reply_rate"]:.1f}%')
+
+@cli.command()
+@click.option('--segment', type=click.Choice(['vip', 'regular', 'new', 'inactive']), help='Filter by segment')
+def segments(segment):
+    """Show customer segments"""
+    from src.database.segmentation import CustomerSegmentation
+    
+    if segment:
+        customers = CustomerSegmentation.get_customers_by_segment(segment)
+        click.echo(f'\n=== {segment.upper()} Customers ({len(customers)}) ===')
+        for customer in customers[:20]:  # Show first 20
+            click.echo(f"  {customer['name']} ({customer['email']}) - {customer['appointment_count']} appointments")
+        if len(customers) > 20:
+            click.echo(f'  ... and {len(customers) - 20} more')
+    else:
+        stats = CustomerSegmentation.get_segment_stats()
+        click.echo('\n=== Customer Segments ===')
+        click.echo(f'VIP: {stats["vip_count"]}')
+        click.echo(f'Regular: {stats["regular_count"]}')
+        click.echo(f'New: {stats["new_count"]}')
+        click.echo(f'Inactive: {stats["inactive_count"]}')
+        click.echo(f'Total: {stats["total_customers"]}')
+
+@cli.command()
+def engagement():
+    """Show email engagement metrics"""
+    from src.database.response_tracking import ResponseTracker
+    
+    stats = ResponseTracker.get_response_stats()
+    
+    click.echo('\n=== Email Engagement Metrics ===')
+    click.echo(f'Total Emails Sent: {stats["total_emails"]}')
+    click.echo(f'Opened: {stats["opened"]} ({stats["open_rate"]:.1f}%)')
+    click.echo(f'Clicked: {stats["clicked"]} ({stats["click_rate"]:.1f}%)')
+    click.echo(f'Replied: {stats["replied"]} ({stats["reply_rate"]:.1f}%)')
 
 if __name__ == '__main__':
     cli()

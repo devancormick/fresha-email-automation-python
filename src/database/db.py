@@ -51,6 +51,10 @@ def init_database():
         )
     ''')
     
+    # Initialize response tracking
+    from src.database.response_tracking import ResponseTracker
+    ResponseTracker.init_response_tracking()
+    
     conn.commit()
     conn.close()
     logger.info('Database initialized')
