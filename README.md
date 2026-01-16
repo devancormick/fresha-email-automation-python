@@ -18,11 +18,17 @@ Automated email system for Fresha nail salon appointments. Sends same-day thank-
 - **NEW**: Automatic database backups
 - **NEW**: Rate limiting protection
 - **NEW**: Configuration validation
+- **NEW**: Docker containerization support
+- **NEW**: Web-based monitoring dashboard
+- **NEW**: GitHub Actions CI/CD pipeline
+- **NEW**: Customer segmentation (VIP, Regular, New, Inactive)
+- **NEW**: Email response tracking (opens, clicks, replies)
 
 ## Documentation
 
 - **[DEPLOYMENT.md](DEPLOYMENT.md)** - Comprehensive deployment guide with step-by-step instructions
 - **[TEST_RESULTS.md](TEST_RESULTS.md)** - Complete test results and validation report
+- **[HANDOVER.md](HANDOVER.md)** - Handover video guide and walkthrough script
 
 ## Prerequisites
 
@@ -96,6 +102,13 @@ python -m src.cli health
 # View statistics
 python -m src.cli stats
 
+# View customer segments
+python -m src.cli segments
+python -m src.cli segments --segment vip
+
+# View email engagement metrics
+python -m src.cli engagement
+
 # Send thank-you emails manually
 python -m src.cli send-thankyou --time-slot 12pm
 python -m src.cli send-thankyou --time-slot 7pm
@@ -148,6 +161,19 @@ The scheduler will automatically run:
 ## Deployment
 
 > 📖 **For detailed deployment instructions, see [DEPLOYMENT.md](DEPLOYMENT.md)**
+
+### Docker Deployment (Recommended)
+
+```bash
+# Build and run with Docker Compose
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Access monitoring dashboard
+# http://localhost:8080
+```
 
 ### Quick Deployment
 
@@ -227,6 +253,21 @@ cp db/fresha.db db/fresha.db.backup
 ```
 
 ## Monitoring
+
+### Web Dashboard
+
+Access the monitoring dashboard:
+```bash
+python -m src.monitoring.dashboard
+# Access at http://localhost:8080
+```
+
+The dashboard shows:
+- System health status
+- Email statistics
+- Success rates
+- Recent activity
+- API endpoints for integration
 
 ### Logs
 
