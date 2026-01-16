@@ -19,6 +19,11 @@ Automated email system for Fresha nail salon appointments. Sends same-day thank-
 - **NEW**: Rate limiting protection
 - **NEW**: Configuration validation
 
+## Documentation
+
+- **[DEPLOYMENT.md](DEPLOYMENT.md)** - Comprehensive deployment guide with step-by-step instructions
+- **[TEST_RESULTS.md](TEST_RESULTS.md)** - Complete test results and validation report
+
 ## Prerequisites
 
 - Python 3.8+
@@ -141,6 +146,15 @@ The scheduler will automatically run:
 - Health checks every 6 hours
 
 ## Deployment
+
+> 📖 **For detailed deployment instructions, see [DEPLOYMENT.md](DEPLOYMENT.md)**
+
+### Quick Deployment
+
+Use the automated deployment script:
+```bash
+./scripts/deploy.sh
+```
 
 ### Option 1: Systemd Service
 
@@ -276,6 +290,29 @@ export PYTHONPATH="${PYTHONPATH}:/path/to/fresha-email-automation-python"
 - Regularly rotate credentials
 - Monitor logs for suspicious activity
 
+## Testing
+
+> 📊 **For complete test results, see [TEST_RESULTS.md](TEST_RESULTS.md)**
+
+All tests have been run and verified. The project includes:
+- ✅ Comprehensive test coverage
+- ✅ Health check validation
+- ✅ Database operations testing
+- ✅ CLI interface testing
+- ✅ Email system validation
+
+Run tests manually:
+```bash
+# Check system health
+python -m src.cli health
+
+# View statistics
+python -m src.cli stats
+```
+
 ## Support
 
-For issues or questions, check the logs in `logs/` directory.
+For issues or questions:
+- Check the logs in `logs/` directory
+- Review [TEST_RESULTS.md](TEST_RESULTS.md) for test validation
+- See [DEPLOYMENT.md](DEPLOYMENT.md) for deployment troubleshooting
