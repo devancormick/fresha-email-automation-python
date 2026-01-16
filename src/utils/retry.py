@@ -1,3 +1,4 @@
+import logging
 from tenacity import (
     retry,
     stop_after_attempt,
@@ -7,7 +8,6 @@ from tenacity import (
 )
 from src.utils.logger import logger
 import smtplib
-import requests
 
 @retry(
     stop=stop_after_attempt(3),
@@ -30,5 +30,3 @@ def retry_email_operation(func, *args, **kwargs):
 def retry_scraper_operation(func, *args, **kwargs):
     """Retry decorator for scraper operations"""
     return func(*args, **kwargs)
-
-import logging
