@@ -11,6 +11,13 @@ Automated email system for Fresha nail salon appointments. Sends same-day thank-
 - Comprehensive logging (sent/skipped/failed)
 - Failure alerts via email
 - Secure credential handling
+- **NEW**: Retry logic with exponential backoff
+- **NEW**: Health check system
+- **NEW**: CLI interface for management
+- **NEW**: Metrics and statistics collection
+- **NEW**: Automatic database backups
+- **NEW**: Rate limiting protection
+- **NEW**: Configuration validation
 
 ## Prerequisites
 
@@ -70,6 +77,37 @@ Edit `config/.env` with your credentials:
 
 ## Usage
 
+### CLI Commands
+
+The project includes a comprehensive CLI interface:
+
+```bash
+# Initialize database
+python -m src.cli init
+
+# Check system health
+python -m src.cli health
+
+# View statistics
+python -m src.cli stats
+
+# Send thank-you emails manually
+python -m src.cli send-thankyou --time-slot 12pm
+python -m src.cli send-thankyou --time-slot 7pm
+
+# Send follow-up emails manually
+python -m src.cli send-followup
+
+# Scrape appointments
+python -m src.cli scrape
+
+# Backup database
+python -m src.cli backup
+
+# Restore database
+python -m src.cli restore db/backups/fresha_20240115_020000.db
+```
+
 ### Development Mode
 
 Run scripts individually:
@@ -99,6 +137,8 @@ python src/main.py
 The scheduler will automatically run:
 - Thank-you emails at 12pm and 7pm daily
 - Follow-up emails at 10am daily
+- Daily database backups at 2am
+- Health checks every 6 hours
 
 ## Deployment
 
